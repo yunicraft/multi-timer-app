@@ -1,0 +1,51 @@
+---
+description: UI/UX Guidelines(Screen, Input, Button, Image)
+globs: 
+---
+
+## UI/UX 가이드라인 (UI/UX Guidelines)
+
+### 1. 화면 구현 (Screen Implementation)
+- 홈 화면을 제외한 모든 화면에 뒤로가기 버튼을 구현합니다.
+  ```dart
+  AppBar(
+    leading: BackButton(),
+    // ... other properties
+  )
+  ```
+
+### 2. 사용자 입력 처리 (User Input Handling)
+- 모든 입력 화면에 GestureDetector를 사용하여 키보드 숨김 처리를 구현합니다.
+  ```dart
+  GestureDetector(
+    onTap: () => FocusScope.of(context).unfocus(),
+    child: Scaffold(
+      // ... screen content
+    ),
+  )
+  ```
+
+### 3. 버튼 구현 (Button Implementation)
+- 모든 버튼은 중복 클릭 방지 로직을 포함해야 합니다.
+  ```dart
+  bool _isProcessing = false;
+  
+  void onTap() async {
+    if (_isProcessing) return;
+    setState(() => _isProcessing = true);
+    try {
+      await performAction();
+    } finally {
+      setState(() => _isProcessing = false);
+    }
+  }
+  ```
+
+### 4. 이미지 구현 (Image Implementation)
+- cached_network_image 패키지를 이용해 이미지를 최적화 합니다.
+- 이미지 파일명 형식: `{project_name}_{timestamp}_{purpose}.{extension}`
+  ```dart
+  String generateImageFileName(String purpose) {
+    return 'timefolio_${DateTime.now().millisecondsSinceEpoch}_$purpose';
+  }
+  ```

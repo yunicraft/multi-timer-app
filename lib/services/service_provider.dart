@@ -1,4 +1,5 @@
 import 'package:timefolio/services/task_service.dart';
+import 'package:timefolio/services/report_service.dart';
 
 class ServiceProvider {
   static final ServiceProvider _instance = ServiceProvider._internal();
@@ -7,10 +8,14 @@ class ServiceProvider {
     return _instance;
   }
 
-  ServiceProvider._internal();
+  ServiceProvider._internal() {
+    // ReportService 초기화 (TaskService 의존성 주입)
+    reportService = ReportService(taskService);
+  }
 
   // 서비스 인스턴스들
   final TaskService taskService = TaskService();
+  late final ReportService reportService;
 
   // 모든 서비스가 초기화될 때까지 기다림
   Future<void> waitForServicesInitialization() async {

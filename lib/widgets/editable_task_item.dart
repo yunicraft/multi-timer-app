@@ -387,7 +387,7 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
                           vertical: 12, horizontal: 16),
                       decoration: BoxDecoration(
                         color: widget.task.isRunning
-                            ? AppColors.primary.withOpacity(0.2)
+                            ? AppColors.onPrimaryContainer
                             : AppColors.darkCard,
                         borderRadius: BorderRadius.only(
                           topLeft: const Radius.circular(8),
@@ -429,6 +429,18 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
                               Icons.timer,
                               color: AppColors.primary,
                               size: 20,
+                            ),
+                          // 스와이프 힌트 추가
+                          if (!widget.task.isRunning)
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.chevron_left,
+                                  color: Colors.white.withOpacity(0.4),
+                                  size: 16,
+                                ),
+                              ],
                             ),
                         ],
                       ),

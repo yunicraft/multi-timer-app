@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:timefolio/models/task.dart';
 import 'package:timefolio/services/service_provider.dart';
@@ -161,32 +162,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     final remainingSeconds = seconds % 60;
 
     return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
-  }
-
-  // 레코드 삭제 확인 다이얼로그
-  Future<void> _showDeleteConfirmDialog(int index) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('기록 삭제'),
-        content: const Text('이 기록을 삭제하시겠습니까?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('삭제'),
-          ),
-        ],
-      ),
-    );
-
-    if (result == true) {
-      _taskService.deleteTaskRecord(widget.taskId, index);
-      _loadTaskRecords();
-    }
   }
 
   // 날짜 선택 다이얼로그
@@ -464,6 +439,13 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             ),
           ],
         ),
+        // 플로팅 액션 버튼 추가
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: AppColors.primary,
+          onPressed: _showAddRecordDialog,
+          child: const Icon(Icons.add),
+          tooltip: '기록 추가',
+        ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -518,21 +500,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 ],
               ),
 
-              // 기록 추가 버튼
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextButton.icon(
-                    icon: const Icon(Icons.add, color: AppColors.primary),
-                    label: const Text(
-                      '기록 추가',
-                      style: TextStyle(color: AppColors.primary),
-                    ),
-                    onPressed: _showAddRecordDialog,
-                  ),
-                ],
-              ),
-
+              // 기록 추가 버튼 제거
               const SizedBox(height: 8),
 
               // 기록 목록
@@ -646,7 +614,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       );
     }
 
-    // 기존 기록 목록
     return ListView.builder(
       itemCount: _records.length + (_isRunning ? 1 : 0),
       itemBuilder: (context, index) {
@@ -662,42 +629,79 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         final startTime = timeFormat.format(record.startTime);
         final endTime = timeFormat.format(record.endTime);
 
-        return Dismissible(
-          key: ValueKey(
-              'record_${recordIndex}_${record.startTime.millisecondsSinceEpoch}'),
-          background: Container(
-            color: Colors.red,
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 16),
-            child: const Icon(
-              Icons.delete,
-              color: Colors.white,
+        // Slidable 위젯 사용
+        return Slidable(
+          key: ValueKey('record_$recordIndex'),
+          endActionPane: ActionPane(
+            motion: const ScrollMotion(),
+            dismissible: DismissiblePane(
+              onDismissed: () {
+                // 삭제 후 상태 업데이트
+                setState(() {
+                  _taskService.deleteTaskRecord(widget.taskId, recordIndex);
+                  _records.removeAt(recordIndex);
+                  _totalDuration =
+                      _taskService.getTaskTotalDuration(widget.taskId);
+                });
+              },
+              confirmDismiss: () async {
+                return await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('기록 삭제'),
+                        content: const Text('이 기록을 삭제하시겠습니까?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('취소'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('삭제'),
+                          ),
+                        ],
+                      ),
+                    ) ??
+                    false;
+              },
             ),
-          ),
-          direction: DismissDirection.endToStart,
-          confirmDismiss: (direction) async {
-            return await showDialog<bool>(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('기록 삭제'),
-                content: const Text('이 기록을 삭제하시겠습니까?'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: const Text('취소'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, true),
-                    child: const Text('삭제'),
-                  ),
-                ],
+            children: [
+              SlidableAction(
+                onPressed: (context) async {
+                  final shouldDelete = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('기록 삭제'),
+                      content: const Text('이 기록을 삭제하시겠습니까?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('취소'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('삭제'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (shouldDelete == true && mounted) {
+                    setState(() {
+                      _taskService.deleteTaskRecord(widget.taskId, recordIndex);
+                      _records.removeAt(recordIndex);
+                      _totalDuration =
+                          _taskService.getTaskTotalDuration(widget.taskId);
+                    });
+                  }
+                },
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                icon: Icons.delete,
+                label: '삭제',
               ),
-            );
-          },
-          onDismissed: (direction) {
-            _taskService.deleteTaskRecord(widget.taskId, recordIndex);
-            _loadTaskRecords();
-          },
+            ],
+          ),
           child: Container(
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(12),

@@ -45,6 +45,7 @@ final router = GoRouter(
         return TaskDetailScreen(
           taskId: taskId,
           taskName: taskName['name'] ?? '',
+          taskIndex: taskName['index'] ?? 0,
           onNameChanged: taskName['onNameChanged'],
         );
       },

@@ -71,7 +71,7 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
   void _saveName() {
     // 텍스트가 비어있으면 자동으로 '새 태스크'로 설정
     if (_controller.text.trim().isEmpty) {
-      _controller.text = '새 태스크 ${widget.task.id}';
+      _controller.text = '새 태스크 ${widget.index + 1}';
     }
 
     // 이름이 변경되었을 때만 저장
@@ -108,11 +108,11 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
       margin: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          // 태스크 번호
+          // 태스크 번호 (ID 대신 순번 표시)
           SizedBox(
             width: 30,
             child: Text(
-              '${widget.task.id}',
+              '${widget.index + 1}',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,

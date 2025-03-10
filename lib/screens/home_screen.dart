@@ -79,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('태스크 ${task.id} 수정'),
+        title: Text('태스크 ${taskIndex + 1} 수정'),
         content: TextField(
           controller: controller,
           decoration: const InputDecoration(
@@ -96,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               // 이름이 비어있으면 기본 이름 설정
               if (controller.text.trim().isEmpty) {
-                controller.text = '새 태스크 ${task.id}';
+                controller.text = '새 태스크 ${taskIndex + 1}';
               }
 
               setState(() {
@@ -136,6 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
       '/task/${task.id}',
       extra: {
         'name': task.name,
+        'index': taskIndex + 1,
         'onNameChanged': (String newName) {
           setState(() {
             _taskService.updateTaskName(task.id, newName);
@@ -187,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
           formattedDate,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),

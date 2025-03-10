@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:timefolio/theme/app_colors.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final int taskId;
   final String taskName;
+  final int taskIndex;
   final Function(String) onNameChanged;
 
   const TaskDetailScreen({
     super.key,
     required this.taskId,
     required this.taskName,
+    required this.taskIndex,
     required this.onNameChanged,
   });
 
@@ -42,14 +45,18 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 현재 날짜 포맷
+    final dateFormat = DateFormat('yyyy.MM.dd');
+    final formattedDate = dateFormat.format(DateTime.now());
+
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          '태스크 ${widget.taskId} 상세정보',
-          style: const TextStyle(color: Colors.white),
+          formattedDate,
+          style: const TextStyle(color: Colors.white, fontSize: 20),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),

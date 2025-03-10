@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'screens/home_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/report_screen.dart';
 import 'widgets/back_button_handler.dart';
 import 'package:flutter/material.dart';
 
@@ -26,6 +27,12 @@ final router = GoRouter(
     GoRoute(
       path: '/onboarding',
       builder: (context, state) => const OnboardingScreen(),
+    ),
+
+    // 리포트 화면
+    GoRoute(
+      path: '/report',
+      builder: (context, state) => const ReportScreen(),
     ),
 
     // 메인 앱 화면들

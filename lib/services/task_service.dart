@@ -121,7 +121,8 @@ class TaskService {
     final taskIndex = _tasks.indexWhere((task) => task.id == taskId);
     if (taskIndex != -1) {
       final task = _tasks[taskIndex];
-      task.isRunning = !task.isRunning;
+      final wasRunning = task.isRunning;
+      task.isRunning = !wasRunning;
 
       if (task.isRunning) {
         // 타이머 시작
@@ -133,15 +134,52 @@ class TaskService {
           if (otherTask.id != taskId && otherTask.isRunning) {
             otherTask.isRunning = false;
             otherTask.endTime = DateTime.now();
+
+            // 다른 태스크의 기록 추가
+            if (otherTask.startTime != null && otherTask.endTime != null) {
+              otherTask.records.add(TaskRecord(
+                startTime: otherTask.startTime!,
+                endTime: otherTask.endTime!,
+              ));
+            }
           }
         }
       } else {
         // 타이머 중지
         task.endTime = DateTime.now();
+
+        // 기록 추가
+        if (task.startTime != null && task.endTime != null) {
+          task.records.add(TaskRecord(
+            startTime: task.startTime!,
+            endTime: task.endTime!,
+          ));
+        }
       }
 
       // 변경사항 저장
       _saveToPrefs();
     }
+  }
+
+  // 태스크 기록 가져오기
+  List<TaskRecord> getTaskRecords(int taskId) {
+    final taskIndex = _tasks.indexWhere((task) => task.id == taskId);
+    if (taskIndex != -1) {
+      // 내림차순 정렬 (최신 기록이 먼저 오도록)
+      final records = List<TaskRecord>.from(_tasks[taskIndex].records);
+      records.sort((a, b) => b.startTime.compareTo(a.startTime));
+      return records;
+    }
+    return [];
+  }
+
+  // 태스크 총 기록 시간 가져오기 (초 단위)
+  int getTaskTotalDuration(int taskId) {
+    final taskIndex = _tasks.indexWhere((task) => task.id == taskId);
+    if (taskIndex != -1) {
+      return _tasks[taskIndex].totalDurationInSeconds;
+    }
+    return 0;
   }
 }

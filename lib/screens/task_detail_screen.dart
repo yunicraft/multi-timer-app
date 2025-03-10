@@ -639,7 +639,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 // 삭제 후 상태 업데이트
                 setState(() {
                   _taskService.deleteTaskRecord(widget.taskId, recordIndex);
-                  _records.removeAt(recordIndex);
+                  _records = _taskService
+                      .getTaskRecords(widget.taskId); // 전체 레코드를 다시 로드
                   _totalDuration =
                       _taskService.getTaskTotalDuration(widget.taskId);
                 });
@@ -689,7 +690,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   if (shouldDelete == true && mounted) {
                     setState(() {
                       _taskService.deleteTaskRecord(widget.taskId, recordIndex);
-                      _records.removeAt(recordIndex);
+                      _records = _taskService
+                          .getTaskRecords(widget.taskId); // 전체 레코드를 다시 로드
                       _totalDuration =
                           _taskService.getTaskTotalDuration(widget.taskId);
                     });

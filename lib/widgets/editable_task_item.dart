@@ -202,12 +202,10 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
                     color: AppColors.primary,
                     size: 24,
                   )
-                : const Text(
-                    'E',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                : const Icon(
+                    Icons.edit_outlined,
+                    color: Colors.white,
+                    size: 24,
                   ),
             onPressed: _onCompleteTap,
           ),

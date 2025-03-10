@@ -166,19 +166,72 @@ class TaskService {
   List<TaskRecord> getTaskRecords(int taskId) {
     final taskIndex = _tasks.indexWhere((task) => task.id == taskId);
     if (taskIndex != -1) {
-      // 내림차순 정렬 (최신 기록이 먼저 오도록)
+      // 오름차순 정렬 (오래된 기록이 먼저 오도록)
       final records = List<TaskRecord>.from(_tasks[taskIndex].records);
-      records.sort((a, b) => b.startTime.compareTo(a.startTime));
+      records.sort((a, b) => a.startTime.compareTo(b.startTime));
       return records;
     }
     return [];
+  }
+
+  // 현재 측정 중인 태스크인지 확인
+  bool isTaskRunning(int taskId) {
+    final taskIndex = _tasks.indexWhere((task) => task.id == taskId);
+    if (taskIndex != -1) {
+      return _tasks[taskIndex].isRunning;
+    }
+    return false;
+  }
+
+  // 현재 측정 중인 태스크의 시작 시간 가져오기
+  DateTime? getTaskStartTime(int taskId) {
+    final taskIndex = _tasks.indexWhere((task) => task.id == taskId);
+    if (taskIndex != -1 && _tasks[taskIndex].isRunning) {
+      return _tasks[taskIndex].startTime;
+    }
+    return null;
+  }
+
+  // 태스크 레코드 추가
+  void addTaskRecord(int taskId, DateTime startTime, DateTime endTime) {
+    final taskIndex = _tasks.indexWhere((task) => task.id == taskId);
+    if (taskIndex != -1) {
+      _tasks[taskIndex].records.add(TaskRecord(
+            startTime: startTime,
+            endTime: endTime,
+          ));
+
+      // 변경사항 저장
+      _saveToPrefs();
+    }
+  }
+
+  // 태스크 레코드 삭제
+  void deleteTaskRecord(int taskId, int recordIndex) {
+    final taskIndex = _tasks.indexWhere((task) => task.id == taskId);
+    if (taskIndex != -1 &&
+        recordIndex >= 0 &&
+        recordIndex < _tasks[taskIndex].records.length) {
+      _tasks[taskIndex].records.removeAt(recordIndex);
+
+      // 변경사항 저장
+      _saveToPrefs();
+    }
   }
 
   // 태스크 총 기록 시간 가져오기 (초 단위)
   int getTaskTotalDuration(int taskId) {
     final taskIndex = _tasks.indexWhere((task) => task.id == taskId);
     if (taskIndex != -1) {
-      return _tasks[taskIndex].totalDurationInSeconds;
+      int total = _tasks[taskIndex].totalDurationInSeconds;
+
+      // 현재 측정 중인 시간도 포함
+      if (_tasks[taskIndex].isRunning && _tasks[taskIndex].startTime != null) {
+        total +=
+            DateTime.now().difference(_tasks[taskIndex].startTime!).inSeconds;
+      }
+
+      return total;
     }
     return 0;
   }

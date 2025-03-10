@@ -667,7 +667,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 },
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
-                icon: Icons.delete,
                 label: '삭제',
               ),
             ],
@@ -683,12 +682,28 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // 날짜
-                Text(
-                  startDate,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      startDate,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                    // 스와이프 힌트 추가
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.chevron_left,
+                          color: Colors.white.withOpacity(0.4),
+                          size: 16,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 4),
 

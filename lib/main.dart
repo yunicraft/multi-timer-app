@@ -6,6 +6,9 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 void main() async {
+  // Flutter 엔진 초기화
+  WidgetsFlutterBinding.ensureInitialized();
+
   // 환경 변수 로드
   await dotenv.load(fileName: '.env');
 

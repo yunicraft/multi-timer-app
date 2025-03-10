@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
-import '../screens/home_screen.dart';
-import '../widgets/back_button_handler.dart';
+import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
+import 'widgets/back_button_handler.dart';
 import 'package:flutter/material.dart';
 
 // 모든 화면은 BackButtonHandler 로 감싸야 함.
@@ -12,7 +13,15 @@ final _shellNavigatorKey = GlobalKey<NavigatorState>();
 final router = GoRouter(
   navigatorKey: rootNavigatorKey,
   observers: [],
+  initialLocation: '/',
   routes: [
+    // 스플래시 화면 (초기 화면)
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const SplashScreen(),
+    ),
+
+    // 메인 앱 화면들
     ShellRoute(
       navigatorKey: _shellNavigatorKey,
       builder: (context, state, child) {
@@ -23,7 +32,7 @@ final router = GoRouter(
       },
       routes: [
         GoRoute(
-          path: '/',
+          path: '/home',
           builder: (context, state) {
             final scaffoldKey = GlobalKey<ScaffoldState>();
             return HomeScreen(scaffoldKey: scaffoldKey);

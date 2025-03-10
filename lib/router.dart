@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'screens/home_screen.dart';
 import 'screens/splash_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'widgets/back_button_handler.dart';
 import 'package:flutter/material.dart';
 
@@ -19,6 +20,12 @@ final router = GoRouter(
     GoRoute(
       path: '/',
       builder: (context, state) => const SplashScreen(),
+    ),
+
+    // 온보딩 화면
+    GoRoute(
+      path: '/onboarding',
+      builder: (context, state) => const OnboardingScreen(),
     ),
 
     // 메인 앱 화면들

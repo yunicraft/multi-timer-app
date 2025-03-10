@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       routerConfig: router,
-      title: packageInfo.appName,
+      title: 'Timefolio',
       theme: AppTheme.lightTheme,
       builder: (context, child) {
         if (child == null) return const SizedBox.shrink();

@@ -525,7 +525,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           Icon(
             Icons.history,
             size: 64,
-            color: AppColors.gold.withOpacity(0.5),
+            color: AppColors.gold.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           const Text(
@@ -566,7 +566,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.2),
+            color: AppColors.primary.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: AppColors.primary, width: 2),
           ),

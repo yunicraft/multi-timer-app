@@ -48,7 +48,7 @@ class AppDrawer extends StatelessWidget {
                   Text(
                     '당신의 시간 자산, 제대로 투자하세요.',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: Colors.white.withValues(alpha: 0.7),
                       fontSize: 14,
                     ),
                   ),

@@ -20,7 +20,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   // 현재 날짜
-  DateTime _selectedDate = DateTime.now();
+  DateTime selectedDate = DateTime.now();
 
   // 서비스 프로바이더
   final _serviceProvider = ServiceProvider();
@@ -66,50 +66,50 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // 태스크 이름 편집 함수 (다이얼로그 방식 - 상세 화면에서 사용)
-  void _editTaskName(int taskId) {
-    final tasks = _taskService.getTasks();
-    final taskIndex = tasks.indexWhere((task) => task.id == taskId);
-    if (taskIndex == -1) return;
+  // // 태스크 이름 편집 함수 (다이얼로그 방식 - 상세 화면에서 사용)
+  // void _editTaskName(int taskId) {
+  //   final tasks = _taskService.getTasks();
+  //   final taskIndex = tasks.indexWhere((task) => task.id == taskId);
+  //   if (taskIndex == -1) return;
 
-    final task = tasks[taskIndex];
-    final TextEditingController controller =
-        TextEditingController(text: task.name);
+  //   final task = tasks[taskIndex];
+  //   final TextEditingController controller =
+  //       TextEditingController(text: task.name);
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('태스크 ${taskIndex + 1} 수정'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: '태스크 이름을 입력하세요',
-          ),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
-          ),
-          TextButton(
-            onPressed: () {
-              // 이름이 비어있으면 기본 이름 설정
-              if (controller.text.trim().isEmpty) {
-                controller.text = '새 태스크 ${taskIndex + 1}';
-              }
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: Text('태스크 ${taskIndex + 1} 수정'),
+  //       content: TextField(
+  //         controller: controller,
+  //         decoration: const InputDecoration(
+  //           hintText: '태스크 이름을 입력하세요',
+  //         ),
+  //         autofocus: true,
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(context),
+  //           child: const Text('취소'),
+  //         ),
+  //         TextButton(
+  //           onPressed: () {
+  //             // 이름이 비어있으면 기본 이름 설정
+  //             if (controller.text.trim().isEmpty) {
+  //               controller.text = '새 태스크 ${taskIndex + 1}';
+  //             }
 
-              setState(() {
-                _taskService.updateTaskName(task.id, controller.text);
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('저장'),
-          ),
-        ],
-      ),
-    );
-  }
+  //             setState(() {
+  //               _taskService.updateTaskName(task.id, controller.text);
+  //             });
+  //             Navigator.pop(context);
+  //           },
+  //           child: const Text('저장'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // 태스크 타이머 시작/중지 함수
   void _toggleTaskTimer(int taskId) {
@@ -150,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     // 현재 날짜 포맷
     final dateFormat = DateFormat('yyyy.MM.dd');
-    final formattedDate = dateFormat.format(_selectedDate);
+    final formattedDate = dateFormat.format(selectedDate);
 
     // 태스크 목록
     final tasks = _taskService.getTasks();

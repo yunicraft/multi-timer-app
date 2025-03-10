@@ -195,15 +195,6 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
     }
   }
 
-  // 시간 형식으로 변환 (HH:MM:SS)
-  String _formatDuration(int seconds) {
-    final hours = seconds ~/ 3600;
-    final minutes = (seconds % 3600) ~/ 60;
-    final remainingSeconds = seconds % 60;
-
-    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
-  }
-
   // 캡션 위젯 생성
   Widget _buildCaption() {
     // 기록이 없는 경우
@@ -437,7 +428,7 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
                               children: [
                                 Icon(
                                   Icons.chevron_left,
-                                  color: Colors.white.withOpacity(0.4),
+                                  color: Colors.white.withValues(alpha: 0.4),
                                   size: 16,
                                 ),
                               ],
@@ -452,8 +443,8 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
                           vertical: 6, horizontal: 16),
                       decoration: BoxDecoration(
                         color: widget.task.isRunning
-                            ? AppColors.primary.withOpacity(0.1)
-                            : AppColors.darkCard.withOpacity(0.7),
+                            ? AppColors.primary.withValues(alpha: 0.1)
+                            : AppColors.darkCard.withValues(alpha: 0.7),
                         borderRadius: const BorderRadius.only(
                           bottomLeft: Radius.circular(8),
                           bottomRight: Radius.circular(8),

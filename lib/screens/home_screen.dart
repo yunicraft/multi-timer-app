@@ -6,8 +6,8 @@ import 'package:timefolio/services/service_provider.dart';
 import 'package:timefolio/services/task_service.dart';
 import 'package:timefolio/theme/app_colors.dart';
 import 'package:timefolio/widgets/app_drawer.dart';
+import 'package:timefolio/widgets/editable_task_item.dart';
 import 'package:timefolio/widgets/empty_task_message.dart';
-import 'package:timefolio/widgets/task_item.dart';
 
 class HomeScreen extends StatefulWidget {
   final GlobalKey<ScaffoldState>? scaffoldKey;
@@ -28,6 +28,9 @@ class _HomeScreenState extends State<HomeScreen> {
   // 태스크 서비스
   late final TaskService _taskService;
 
+  // 현재 편집 중인 태스크 ID
+  int? _editingTaskId;
+
   @override
   void initState() {
     super.initState();
@@ -46,17 +49,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 태스크 추가 함수
   void _addTask() {
-    setState(() {
-      final newTask = _taskService.addTask('');
+    final newTask = _taskService.addTask('');
 
-      // 포커스를 새 태스크로 이동하기 위해 약간의 지연 후 편집 모드 시작
-      Future.delayed(const Duration(milliseconds: 100), () {
-        _editTaskName(newTask.id);
-      });
+    setState(() {
+      // 새 태스크를 편집 모드로 설정
+      _editingTaskId = newTask.id;
     });
   }
 
-  // 태스크 이름 편집 함수
+  // 태스크 이름 변경 함수
+  void _updateTaskName(int taskId, String newName) {
+    setState(() {
+      // 위젯에서 이미 빈 이름 처리를 했으므로 그대로 사용
+      _taskService.updateTaskName(taskId, newName);
+      _editingTaskId = null; // 편집 모드 종료
+    });
+  }
+
+  // 태스크 이름 편집 함수 (다이얼로그 방식 - 상세 화면에서 사용)
   void _editTaskName(int taskId) {
     final tasks = _taskService.getTasks();
     final taskIndex = tasks.indexWhere((task) => task.id == taskId);
@@ -84,11 +94,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           TextButton(
             onPressed: () {
-              if (controller.text.isNotEmpty) {
-                setState(() {
-                  _taskService.updateTaskName(task.id, controller.text);
-                });
+              // 이름이 비어있으면 기본 이름 설정
+              if (controller.text.trim().isEmpty) {
+                controller.text = '새 태스크 ${task.id}';
               }
+
+              setState(() {
+                _taskService.updateTaskName(task.id, controller.text);
+              });
               Navigator.pop(context);
             },
             child: const Text('저장'),
@@ -203,19 +216,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // 태스크 목록
             if (tasks.isNotEmpty) _buildTaskList(tasks),
-
-            // 키보드 표시 안내 (태스크가 있을 때만 표시)
-            if (tasks.isNotEmpty)
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  '키보드 올라 옴',
-                  style: TextStyle(
-                    color: Colors.white54,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
           ],
         ),
       ),
@@ -235,12 +235,14 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         itemBuilder: (context, index) {
           final task = tasks[index];
-          return TaskItem(
+          return EditableTaskItem(
             key: ValueKey(task.id),
             task: task,
             index: index,
+            isEditing: task.id == _editingTaskId,
             onToggleTimer: () => _toggleTaskTimer(task.id),
             onShowDetails: () => _showTaskDetails(task.id),
+            onNameChanged: (newName) => _updateTaskName(task.id, newName),
           );
         },
       ),

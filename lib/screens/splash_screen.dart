@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
+
+import 'package:timefolio/utils/onboarding_util.dart';
 // import '../utils/onboarding_util.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -22,12 +24,8 @@ class _SplashScreenState extends State<SplashScreen> {
     // 3초 후 홈 화면으로 이동
     await Future.delayed(const Duration(seconds: 3));
 
-    // 온보딩 상태를 확인하여 이동할 화면 결정 (현재는 사용하지 않음)
-    // final hasSeenOnboarding = await OnboardingUtil.hasSeenOnboarding();
-    // final nextRoute = hasSeenOnboarding ? '/home' : '/onboarding';
-
-    // 항상 홈 화면으로 이동 (요청에 따라)
-    const nextRoute = '/home';
+    final hasSeenOnboarding = await OnboardingUtil.hasSeenOnboarding();
+    final nextRoute = hasSeenOnboarding ? '/home' : '/onboarding';
 
     if (mounted) {
       context.go(nextRoute);

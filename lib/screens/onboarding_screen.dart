@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:timefolio/theme/app_colors.dart';
 import '../utils/onboarding_util.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -93,53 +94,43 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   });
                 },
                 children: [
-                  // 온보딩 페이지 1
-                  OnboardingPage(
-                    title: '올해 이루고 싶은\n목표가 있나요?',
-                    description:
-                        'Timefolio가\n목표를 현실로 만들 수\n있게 도와 드릴게요.\n\n터치로 하루 24시간을\n통제해 보세요.',
-                  ),
+                  // 온보딩 페이지 1 (커스텀 구현)
+                  _buildFirstOnboardingPage(),
 
                   // 온보딩 페이지 2
                   OnboardingPage(
                     title: '01 태스크 만들기',
-                    description: '화면 상단의 + 버튼을\n클릭해서 수행할 일의 이름을\n정해 보아요.',
+                    description: '화면 상단의 + 버튼을 클릭해서\n수행할 일의 이름을 정해 보아요.',
                     imagePath: null,
-                    imageCaption: '+ 위치 보이는 화면',
                   ),
 
                   // 온보딩 페이지 3
                   OnboardingPage(
                     title: '01 태스크 만들기',
-                    description: '원하는 태스크 명칭을 입력하\n고 저장해요.',
+                    description: '원하는 태스크 명칭을 입력하고 저장해요.',
                     imagePath: null,
-                    imageCaption: '태스크 입력 모달\n나타난 화면',
                   ),
 
                   // 온보딩 페이지 4
                   OnboardingPage(
                     title: '01 태스크 만들기',
-                    description:
-                        '태스크 순서를 바꾸고 싶다면,\n태스크 명칭을 꾹 누르시 옮겨\n주세요. 드래그&드롭으로 쉽게\n사용할 수도 있어요.',
+                    description: '태스크 순서를 바꾸고 싶다면\n태스크 명칭을 꾹 눌러서 옮겨 주세요.',
                     imagePath: null,
-                    imageCaption: '태스크 입력 모달\n나타난 화면',
                   ),
 
                   // 온보딩 페이지 5
                   OnboardingPage(
                     title: '02 타이머 사용하기',
                     description:
-                        '측정할 시작할 태스크 명칭을\n터치하면 색상이 바뀌면서 타\n이머가 시작되요.\n타이머를 멈추고 싶다면, 다시\n한 번 클릭해요.',
+                        '태스크 명칭을 터치하면 색상이\n바뀌면서 타이머가 시작되어요.\n\n타이머를 멈추고 싶다면\n다시 한 번 클릭해요.',
                     imagePath: null,
-                    imageCaption: '색상이 바뀌면서\n타이머 시간이 흐르는\n화면',
                   ),
 
                   // 온보딩 페이지 6
                   OnboardingPage(
                     title: '03 기록 보기',
-                    description: '통계 아이콘을 클릭하면 오늘\n하루의 통계를 볼 수 있어요.',
+                    description: '통계 아이콘을 클릭하면\n오늘 하루의 통계를 볼 수 있어요.',
                     imagePath: null,
-                    imageCaption: '통계 아이콘 위치\n확대한 화면',
                   ),
                 ],
               ),
@@ -183,115 +174,53 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ],
               ),
             ),
-
-            // 하단 안내 텍스트
-            if (_currentPage == _totalPages - 1)
-              const Padding(
-                padding: EdgeInsets.only(bottom: 16.0),
-                child: Text(
-                  '[주의] start/stop에 사용되는 컬러를 사용\n자가 지정할 수 있게 해도 좋을 듯',
-                  style: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 12,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
           ],
         ),
       ),
     );
   }
-}
 
-// 온보딩 페이지 위젯
-class OnboardingPage extends StatelessWidget {
-  final String title;
-  final String description;
-  final String? imagePath;
-  final String? imageCaption;
-
-  const OnboardingPage({
-    super.key,
-    required this.title,
-    required this.description,
-    this.imagePath,
-    this.imageCaption,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  // 첫 번째 온보딩 페이지 위젯
+  Widget _buildFirstOnboardingPage() {
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 제목
-          Text(
-            title,
-            style: const TextStyle(
+          const Text(
+            '올해 이루고 싶은\n목표가 있나요?',
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 24,
+              fontSize: 32,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 48),
 
-          // 설명
-          Text(
-            description,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
+          // 설명 (Timefolio 강조)
+          RichText(
+            text: const TextSpan(
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+              ),
+              children: [
+                TextSpan(
+                  text: 'Timefolio',
+                  style: TextStyle(
+                    color: Color(0xFFFFD700), // 황금색
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text:
+                      ' 가\n목표를 현실로 만들 수\n있게 도와 드릴게요.\n\n터치로 하루 24시간을\n통제해 보세요.',
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 32),
-
-          // 이미지 영역 (항상 표시)
-          Expanded(
-            child: Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white30),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // 이미지 (있는 경우) 또는 대체 UI
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: imagePath != null
-                          ? Image.asset(
-                              imagePath!,
-                              fit: BoxFit.contain,
-                              height: 200,
-                              errorBuilder: (context, error, stackTrace) {
-                                // 이미지 로드 실패 시 대체 UI
-                                return _buildPlaceholderImage();
-                              },
-                            )
-                          : _buildPlaceholderImage(),
-                    ),
-
-                    // 이미지 캡션 (있는 경우)
-                    if (imageCaption != null)
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          imageCaption!,
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -325,6 +254,92 @@ class OnboardingPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// 온보딩 페이지 위젯 (2~6 페이지용)
+class OnboardingPage extends StatelessWidget {
+  final String title;
+  final String description;
+  final String? imagePath;
+
+  const OnboardingPage({
+    super.key,
+    required this.title,
+    required this.description,
+    this.imagePath,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // _OnboardingScreenState의 _buildPlaceholderImage 메서드에 접근
+    final state = context.findAncestorStateOfType<_OnboardingScreenState>();
+
+    return Padding(
+      padding: const EdgeInsets.all(24.0),
+      child: Stack(
+        children: [
+          // 텍스트 영역
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 제목
+              Text(
+                title,
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // 설명
+              Text(
+                description,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+
+          // 이미지 영역 (화면 중앙에 고정)
+          Positioned(
+            left: 0,
+            right: 0,
+            top: MediaQuery.of(context).size.height * 0.25, // 화면 높이의 25% 위치에 고정
+            child: Container(
+              height: 250, // 고정 높이
+              alignment: Alignment.center,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.white30),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: imagePath != null
+                      ? Image.asset(
+                          imagePath!,
+                          fit: BoxFit.contain,
+                          height: 200,
+                          errorBuilder: (context, error, stackTrace) {
+                            // 이미지 로드 실패 시 대체 UI
+                            return state?._buildPlaceholderImage() ??
+                                const SizedBox.shrink();
+                          },
+                        )
+                      : state?._buildPlaceholderImage() ??
+                          const SizedBox.shrink(),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

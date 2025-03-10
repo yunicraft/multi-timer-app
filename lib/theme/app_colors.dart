@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Core Colors
-  static const primary = Color(0xFF2196F3);
+  static const primary = Color(0xFFFFD700);
   static const onPrimary = Colors.white;
   static const primaryContainer = Color(0xFFBBDEFB); // 더 연한 primary
   static const onPrimaryContainer =

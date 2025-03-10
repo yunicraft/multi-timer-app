@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
 import 'package:timefolio/models/task.dart';
 import 'package:timefolio/services/service_provider.dart';
 import 'package:timefolio/services/task_service.dart';
@@ -31,10 +33,25 @@ class _HomeScreenState extends State<HomeScreen> {
   // 현재 편집 중인 태스크 ID
   int? _editingTaskId;
 
+  // 스크롤 컨트롤러
+  final ScrollController _scrollController = ScrollController();
+
+  // 태스크 추가 중복 방지를 위한 플래그
+  bool _isAddingTask = false;
+
+  // 리스트뷰 키
+  final GlobalKey _listViewKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
     _taskService = _serviceProvider.taskService;
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   // 온보딩 화면으로 이동하는 함수
@@ -49,11 +66,38 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // 태스크 추가 함수
   void _addTask() {
-    final newTask = _taskService.addTask('');
+    // 이미 태스크 추가 중이면 무시
+    if (_isAddingTask) return;
+
+    // 태스크 추가 중 플래그 설정
+    _isAddingTask = true;
+
+    final tasks = _taskService.getTasks();
+    final newTaskName = '새 태스크 ${tasks.length + 1}';
+    final newTask = _taskService.addTask(newTaskName);
 
     setState(() {
       // 새 태스크를 편집 모드로 설정
       _editingTaskId = newTask.id;
+    });
+
+    // 새 태스크로 스크롤
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // 다음 프레임에서 스크롤 위치 조정
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    });
+
+    // 딜레이 후 플래그 해제
+    Future.delayed(const Duration(milliseconds: 500), () {
+      _isAddingTask = false;
     });
   }
 
@@ -65,51 +109,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _editingTaskId = null; // 편집 모드 종료
     });
   }
-
-  // // 태스크 이름 편집 함수 (다이얼로그 방식 - 상세 화면에서 사용)
-  // void _editTaskName(int taskId) {
-  //   final tasks = _taskService.getTasks();
-  //   final taskIndex = tasks.indexWhere((task) => task.id == taskId);
-  //   if (taskIndex == -1) return;
-
-  //   final task = tasks[taskIndex];
-  //   final TextEditingController controller =
-  //       TextEditingController(text: task.name);
-
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => AlertDialog(
-  //       title: Text('태스크 ${taskIndex + 1} 수정'),
-  //       content: TextField(
-  //         controller: controller,
-  //         decoration: const InputDecoration(
-  //           hintText: '태스크 이름을 입력하세요',
-  //         ),
-  //         autofocus: true,
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(context),
-  //           child: const Text('취소'),
-  //         ),
-  //         TextButton(
-  //           onPressed: () {
-  //             // 이름이 비어있으면 기본 이름 설정
-  //             if (controller.text.trim().isEmpty) {
-  //               controller.text = '새 태스크 ${taskIndex + 1}';
-  //             }
-
-  //             setState(() {
-  //               _taskService.updateTaskName(task.id, controller.text);
-  //             });
-  //             Navigator.pop(context);
-  //           },
-  //           child: const Text('저장'),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   // 태스크 타이머 시작/중지 함수
   void _toggleTaskTimer(int taskId) {
@@ -226,27 +225,64 @@ class _HomeScreenState extends State<HomeScreen> {
   // 태스크 목록 위젯
   Widget _buildTaskList(List<Task> tasks) {
     return Expanded(
-      child: ReorderableListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: tasks.length,
-        onReorder: (oldIndex, newIndex) {
-          setState(() {
-            _taskService.reorderTasks(oldIndex, newIndex);
-          });
-        },
-        itemBuilder: (context, index) {
-          final task = tasks[index];
-          return EditableTaskItem(
-            key: ValueKey(task.id),
-            task: task,
-            index: index,
-            isEditing: task.id == _editingTaskId,
-            onToggleTimer: () => _toggleTaskTimer(task.id),
-            onShowDetails: () => _showTaskDetails(task.id),
-            onDelete: () => _deleteTask(task.id),
-            onNameChanged: (newName) => _updateTaskName(task.id, newName),
-          );
-        },
+      child: Scrollbar(
+        controller: _scrollController,
+        child: ReorderableListView.builder(
+          key: _listViewKey,
+          scrollController: _scrollController,
+          padding: const EdgeInsets.all(16),
+          itemCount: tasks.length,
+          buildDefaultDragHandles: false,
+          onReorder: (oldIndex, newIndex) {
+            setState(() {
+              // TaskService에서 이미 인덱스 조정을 하므로 여기서는 제거
+              _taskService.reorderTasks(oldIndex, newIndex);
+            });
+          },
+          itemBuilder: (context, index) {
+            final task = tasks[index];
+            return Padding(
+              key: ValueKey(task.id),
+              padding: const EdgeInsets.only(right: 28.0),
+              child: Row(
+                children: [
+                  // 태스크 번호 (ID 대신 순번 표시)
+                  Container(
+                    width: 30,
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: Text(
+                      '${index + 1}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+
+                  // 태스크 내용 (드래그 가능한 영역)
+                  Expanded(
+                    child: ReorderableDragStartListener(
+                      index: index,
+                      child: EditableTaskItem(
+                        key: ValueKey('${task.id}_item'),
+                        task: task,
+                        index: index,
+                        isEditing: task.id == _editingTaskId,
+                        onToggleTimer: () => _toggleTaskTimer(task.id),
+                        onShowDetails: () => _showTaskDetails(task.id),
+                        onDelete: () => _deleteTask(task.id),
+                        onNameChanged: (newName) =>
+                            _updateTaskName(task.id, newName),
+                        showTaskNumber: false,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

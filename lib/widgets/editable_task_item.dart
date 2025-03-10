@@ -102,6 +102,7 @@ class EditableTaskItem extends StatefulWidget {
   final VoidCallback onDelete;
   final Function(String) onNameChanged;
   final bool isEditing;
+  final bool showTaskNumber;
 
   const EditableTaskItem({
     super.key,
@@ -112,6 +113,7 @@ class EditableTaskItem extends StatefulWidget {
     required this.onDelete,
     required this.onNameChanged,
     this.isEditing = false,
+    this.showTaskNumber = true,
   });
 
   @override
@@ -231,18 +233,19 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
         margin: const EdgeInsets.only(bottom: 8),
         child: Row(
           children: [
-            // 태스크 번호 (ID 대신 순번 표시)
-            SizedBox(
-              width: 30,
-              child: Text(
-                '${widget.index + 1}',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            // 태스크 번호 (ID 대신 순번 표시) - showTaskNumber가 true일 때만 표시
+            if (widget.showTaskNumber)
+              SizedBox(
+                width: 30,
+                child: Text(
+                  '${widget.index + 1}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
 
             // 태스크 내용 (편집 모드)
             Expanded(
@@ -303,18 +306,19 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
       margin: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          // 태스크 번호 (ID 대신 순번 표시)
-          SizedBox(
-            width: 30,
-            child: Text(
-              '${widget.index + 1}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+          // 태스크 번호 (ID 대신 순번 표시) - showTaskNumber가 true일 때만 표시
+          if (widget.showTaskNumber)
+            SizedBox(
+              width: 30,
+              child: Text(
+                '${widget.index + 1}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
 
           // 태스크 내용 (스와이프 가능한 영역)
           Expanded(

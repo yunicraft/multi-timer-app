@@ -19,7 +19,8 @@ void main() async {
   ]);
 
   // 서비스 프로바이더 초기화 (싱글톤 패턴으로 자동 초기화)
-  ServiceProvider();
+  final serviceProvider = ServiceProvider();
+  await serviceProvider.waitForServicesInitialization();
 
   final packageInfo = await PackageInfo.fromPlatform();
 

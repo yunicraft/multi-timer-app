@@ -131,7 +131,6 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
                       // 롱프레스 시 드래그 시작을 위한 피드백
                       HapticFeedback.mediumImpact();
                     },
-              onDoubleTap: _isEditing ? null : _startEditing,
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(vertical: 12, horizontal: 16),

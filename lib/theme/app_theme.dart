@@ -9,8 +9,8 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primary,
+      brightness: Brightness.dark, // 어두운 테마 사용
+      colorScheme: ColorScheme.dark(
         primary: AppColors.primary,
         onPrimary: AppColors.onPrimary,
         primaryContainer: AppColors.primaryContainer,
@@ -50,10 +50,10 @@ class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
+        systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
           statusBarColor: Colors.transparent,
-          statusBarIconBrightness: Brightness.dark,
-          statusBarBrightness: Brightness.light,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
         ),
         iconTheme: IconThemeData(color: AppColors.onSurface),
         titleTextStyle: GoogleFonts.notoSansKr(
@@ -65,7 +65,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.onPrimary,
           elevation: 1,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
@@ -74,21 +74,21 @@ class AppTheme {
         ),
       ),
       cardTheme: CardTheme(
-        color: AppColors.surface,
+        color: AppColors.darkCard,
         elevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
       ),
       drawerTheme: DrawerThemeData(
-        backgroundColor: AppColors.surface,
+        backgroundColor: AppColors.darkSurface,
         elevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
       ),
       dialogTheme: DialogTheme(
-        backgroundColor: AppColors.surface,
+        backgroundColor: AppColors.darkSurface,
         elevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
@@ -99,6 +99,29 @@ class AppTheme {
           fontWeight: FontWeight.bold,
           color: AppColors.onSurface,
         ),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: AppColors.darkSurface,
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: AppColors.onSurfaceVariant,
+      ),
+      iconTheme: IconThemeData(
+        color: AppColors.onSurface,
+      ),
+      progressIndicatorTheme: ProgressIndicatorThemeData(
+        color: AppColors.primary,
+      ),
+      tabBarTheme: TabBarTheme(
+        labelColor: AppColors.primary,
+        unselectedLabelColor: AppColors.onSurfaceVariant,
+        indicatorColor: AppColors.primary,
+      ),
+      dividerTheme: DividerThemeData(
+        color: AppColors.outline,
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
       ),
     );
   }

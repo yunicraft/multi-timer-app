@@ -61,7 +61,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.darkBackground,
       body: SafeArea(
         child: Column(
           children: [
@@ -75,9 +75,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   const SizedBox(width: 16),
                   TextButton(
                     onPressed: _skipOnboarding,
-                    child: const Text(
+                    child: Text(
                       'skip',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: AppColors.gold),
                     ),
                   ),
                 ],
@@ -145,9 +145,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   // 뒤로가기 버튼
                   TextButton(
                     onPressed: _goToPreviousPage,
-                    child: const Text(
+                    child: Text(
                       'back',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: AppColors.gold),
                     ),
                   ),
 
@@ -155,9 +155,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   SmoothPageIndicator(
                     controller: _pageController,
                     count: _totalPages,
-                    effect: const WormEffect(
-                      dotColor: Colors.grey,
-                      activeDotColor: Colors.white,
+                    effect: WormEffect(
+                      dotColor: Colors.grey.shade800,
+                      activeDotColor: AppColors.gold,
                       dotHeight: 8,
                       dotWidth: 8,
                     ),
@@ -166,9 +166,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   // 다음 버튼
                   TextButton(
                     onPressed: _goToNextPage,
-                    child: const Text(
+                    child: Text(
                       'next',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: AppColors.gold),
                     ),
                   ),
                 ],
@@ -200,8 +200,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
           // 설명 (Timefolio 강조)
           RichText(
-            text: const TextSpan(
-              style: TextStyle(
+            text: TextSpan(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 24,
               ),
@@ -209,11 +209,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 TextSpan(
                   text: 'Timefolio',
                   style: TextStyle(
-                    color: Color(0xFFFFD700), // 황금색
+                    color: AppColors.gold,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                TextSpan(
+                const TextSpan(
                   text:
                       ' 가\n목표를 현실로 만들 수\n있게 도와 드릴게요.\n\n터치로 하루 24시간을\n통제해 보세요.',
                 ),
@@ -232,23 +232,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       width: 200,
       height: 200,
       decoration: BoxDecoration(
-        color: Colors.grey.shade800,
+        color: AppColors.darkCard,
         borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.gold.withOpacity(0.3)),
       ),
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.image_not_supported_outlined,
               size: 48,
-              color: Colors.white54,
+              color: AppColors.gold.withOpacity(0.5),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Text(
               '이미지 준비 중',
               style: TextStyle(
-                color: Colors.white54,
+                color: AppColors.gold.withOpacity(0.7),
                 fontSize: 14,
               ),
             ),
@@ -288,8 +289,8 @@ class OnboardingPage extends StatelessWidget {
               // 제목
               Text(
                 title,
-                style: const TextStyle(
-                  color: AppColors.primary,
+                style: TextStyle(
+                  color: AppColors.gold,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -317,7 +318,7 @@ class OnboardingPage extends StatelessWidget {
               alignment: Alignment.center,
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white30),
+                  border: Border.all(color: AppColors.gold.withOpacity(0.3)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Padding(

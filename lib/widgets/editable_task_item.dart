@@ -490,7 +490,6 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
                           highlightColor: widget.task.isRunning
                               ? AppColors.primary.withValues(alpha: 0.2)
                               : Colors.white.withValues(alpha: 0.05),
-                          onTap: widget.onShowDetails,
                           child: Container(
                             width: double.infinity,
                             padding: const EdgeInsets.symmetric(

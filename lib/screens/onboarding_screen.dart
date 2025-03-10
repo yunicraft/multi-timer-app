@@ -234,7 +234,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       decoration: BoxDecoration(
         color: AppColors.darkCard,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.gold.withOpacity(0.3)),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.3)),
       ),
       child: Center(
         child: Column(
@@ -243,13 +243,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Icon(
               Icons.image_not_supported_outlined,
               size: 48,
-              color: AppColors.gold.withOpacity(0.5),
+              color: AppColors.gold.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 8),
             Text(
               '이미지 준비 중',
               style: TextStyle(
-                color: AppColors.gold.withOpacity(0.7),
+                color: AppColors.gold.withValues(alpha: 0.7),
                 fontSize: 14,
               ),
             ),
@@ -318,7 +318,8 @@ class OnboardingPage extends StatelessWidget {
               alignment: Alignment.center,
               child: Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.gold.withOpacity(0.3)),
+                  border:
+                      Border.all(color: AppColors.gold.withValues(alpha: 0.3)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Padding(

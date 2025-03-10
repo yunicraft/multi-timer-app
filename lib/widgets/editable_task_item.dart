@@ -363,106 +363,163 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
                   ),
                 ],
               ),
-              child: InkWell(
-                onTap: widget.onToggleTimer,
-                onLongPress: () {
-                  // 롱프레스 시 드래그 시작을 위한 피드백
-                  HapticFeedback.mediumImpact();
-                },
-                onDoubleTap: _startEditing, // 더블 탭으로 편집 모드 시작
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 12, horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: widget.task.isRunning
-                            ? AppColors.onPrimaryContainer
-                            : AppColors.darkCard,
-                        borderRadius: BorderRadius.only(
-                          topLeft: const Radius.circular(8),
-                          topRight: const Radius.circular(8),
-                          bottomLeft: Radius.circular(
-                              widget.task.records.isEmpty &&
-                                      !widget.task.isRunning &&
-                                      widget.task.name.isEmpty
-                                  ? 8
-                                  : 0),
-                          bottomRight: Radius.circular(
-                              widget.task.records.isEmpty &&
-                                      !widget.task.isRunning &&
-                                      widget.task.name.isEmpty
-                                  ? 8
-                                  : 0),
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(8),
+                  topRight: const Radius.circular(8),
+                  bottomLeft: Radius.circular(widget.task.records.isEmpty &&
+                          !widget.task.isRunning &&
+                          widget.task.name.isEmpty
+                      ? 8
+                      : 0),
+                  bottomRight: Radius.circular(widget.task.records.isEmpty &&
+                          !widget.task.isRunning &&
+                          widget.task.name.isEmpty
+                      ? 8
+                      : 0),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(8),
+                    topRight: const Radius.circular(8),
+                    bottomLeft: Radius.circular(widget.task.records.isEmpty &&
+                            !widget.task.isRunning &&
+                            widget.task.name.isEmpty
+                        ? 8
+                        : 0),
+                    bottomRight: Radius.circular(widget.task.records.isEmpty &&
+                            !widget.task.isRunning &&
+                            widget.task.name.isEmpty
+                        ? 8
+                        : 0),
+                  ),
+                  splashColor: widget.task.isRunning
+                      ? AppColors.primary.withValues(alpha: 0.3)
+                      : Colors.white.withValues(alpha: 0.1),
+                  highlightColor: widget.task.isRunning
+                      ? AppColors.primary.withValues(alpha: 0.2)
+                      : Colors.white.withValues(alpha: 0.05),
+                  onTap: widget.onToggleTimer,
+                  onLongPress: () {
+                    // 롱프레스 시 드래그 시작을 위한 피드백
+                    HapticFeedback.mediumImpact();
+                  },
+                  onDoubleTap: _startEditing, // 더블 탭으로 편집 모드 시작
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: widget.task.isRunning
+                              ? AppColors.onPrimaryContainer
+                              : AppColors.darkCard,
+                          borderRadius: BorderRadius.only(
+                            topLeft: const Radius.circular(8),
+                            topRight: const Radius.circular(8),
+                            bottomLeft: Radius.circular(
+                                widget.task.records.isEmpty &&
+                                        !widget.task.isRunning &&
+                                        widget.task.name.isEmpty
+                                    ? 8
+                                    : 0),
+                            bottomRight: Radius.circular(
+                                widget.task.records.isEmpty &&
+                                        !widget.task.isRunning &&
+                                        widget.task.name.isEmpty
+                                    ? 8
+                                    : 0),
+                          ),
+                          border: widget.task.isRunning
+                              ? Border.all(color: AppColors.primary, width: 2)
+                              : null,
                         ),
-                        border: widget.task.isRunning
-                            ? Border.all(color: AppColors.primary, width: 2)
-                            : null,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              widget.task.name.isEmpty
-                                  ? '태스크 이름을 입력하세요'
-                                  : widget.task.name,
-                              style: TextStyle(
-                                color: widget.task.name.isEmpty
-                                    ? Colors.white38
-                                    : Colors.white,
-                                fontSize: 16,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                widget.task.name.isEmpty
+                                    ? '태스크 이름을 입력하세요'
+                                    : widget.task.name,
+                                style: TextStyle(
+                                  color: widget.task.name.isEmpty
+                                      ? Colors.white38
+                                      : Colors.white,
+                                  fontSize: 16,
+                                ),
                               ),
                             ),
-                          ),
-                          if (widget.task.isRunning)
-                            const Icon(
-                              Icons.timer,
-                              color: AppColors.primary,
-                              size: 20,
-                            ),
-                          // 스와이프 힌트 추가
-                          if (!widget.task.isRunning)
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.chevron_left,
-                                  color: Colors.white.withValues(alpha: 0.4),
-                                  size: 16,
-                                ),
-                              ],
-                            ),
-                        ],
+                            if (widget.task.isRunning)
+                              const Icon(
+                                Icons.timer,
+                                color: AppColors.primary,
+                                size: 20,
+                              ),
+                            // 스와이프 힌트 추가
+                            if (!widget.task.isRunning)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.chevron_left,
+                                    color: Colors.white.withValues(alpha: 0.4),
+                                    size: 16,
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                    // 캡션 추가
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 6, horizontal: 16),
-                      decoration: BoxDecoration(
-                        color: widget.task.isRunning
-                            ? AppColors.primary.withValues(alpha: 0.1)
-                            : AppColors.darkCard.withValues(alpha: 0.7),
+                      // 캡션 추가
+                      Material(
+                        color: Colors.transparent,
                         borderRadius: const BorderRadius.only(
                           bottomLeft: Radius.circular(8),
                           bottomRight: Radius.circular(8),
                         ),
-                        border: widget.task.isRunning
-                            ? Border(
-                                left: const BorderSide(
-                                    color: AppColors.primary, width: 2),
-                                right: const BorderSide(
-                                    color: AppColors.primary, width: 2),
-                                bottom: const BorderSide(
-                                    color: AppColors.primary, width: 2),
-                              )
-                            : null,
+                        child: InkWell(
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(8),
+                            bottomRight: Radius.circular(8),
+                          ),
+                          splashColor: widget.task.isRunning
+                              ? AppColors.primary.withValues(alpha: 0.3)
+                              : Colors.white.withValues(alpha: 0.1),
+                          highlightColor: widget.task.isRunning
+                              ? AppColors.primary.withValues(alpha: 0.2)
+                              : Colors.white.withValues(alpha: 0.05),
+                          onTap: widget.onShowDetails,
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 6, horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: widget.task.isRunning
+                                  ? AppColors.primary.withValues(alpha: 0.1)
+                                  : AppColors.darkCard.withValues(alpha: 0.7),
+                              borderRadius: const BorderRadius.only(
+                                bottomLeft: Radius.circular(8),
+                                bottomRight: Radius.circular(8),
+                              ),
+                              border: widget.task.isRunning
+                                  ? Border(
+                                      left: const BorderSide(
+                                          color: AppColors.primary, width: 2),
+                                      right: const BorderSide(
+                                          color: AppColors.primary, width: 2),
+                                      bottom: const BorderSide(
+                                          color: AppColors.primary, width: 2),
+                                    )
+                                  : null,
+                            ),
+                            child: _buildCaption(),
+                          ),
+                        ),
                       ),
-                      child: _buildCaption(),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

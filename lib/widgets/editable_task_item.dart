@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:timefolio/models/task.dart';
 import 'package:timefolio/theme/app_colors.dart';
 
@@ -8,6 +9,7 @@ class EditableTaskItem extends StatefulWidget {
   final int index;
   final VoidCallback onToggleTimer;
   final VoidCallback onShowDetails;
+  final VoidCallback onDelete;
   final Function(String) onNameChanged;
   final bool isEditing;
 
@@ -17,6 +19,7 @@ class EditableTaskItem extends StatefulWidget {
     required this.index,
     required this.onToggleTimer,
     required this.onShowDetails,
+    required this.onDelete,
     required this.onNameChanged,
     this.isEditing = false,
   });
@@ -104,6 +107,80 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
 
   @override
   Widget build(BuildContext context) {
+    // 편집 모드일 때는 Slidable을 사용하지 않고 확인 버튼 표시
+    if (_isEditing) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        child: Row(
+          children: [
+            // 태스크 번호 (ID 대신 순번 표시)
+            SizedBox(
+              width: 30,
+              child: Text(
+                '${widget.index + 1}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+            // 태스크 내용 (편집 모드)
+            Expanded(
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: AppColors.darkCard,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        focusNode: _focusNode,
+                        autofocus: true,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                          hintText: '태스크 이름을 입력하세요',
+                          hintStyle: TextStyle(color: Colors.white38),
+                        ),
+                        onSubmitted: (value) {
+                          setState(() {
+                            _isEditing = false;
+                          });
+                          _saveName();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // 확인 버튼
+            IconButton(
+              icon: const Icon(
+                Icons.check_circle,
+                color: AppColors.primary,
+                size: 24,
+              ),
+              onPressed: _onCompleteTap,
+            ),
+          ],
+        ),
+      );
+    }
+
+    // 일반 모드일 때는 Slidable 사용
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -121,92 +198,98 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
             ),
           ),
 
-          // 태스크 내용 (클릭 가능한 영역)
+          // 태스크 내용 (스와이프 가능한 영역)
           Expanded(
-            child: InkWell(
-              onTap: _isEditing ? null : widget.onToggleTimer,
-              onLongPress: _isEditing
-                  ? null
-                  : () {
-                      // 롱프레스 시 드래그 시작을 위한 피드백
-                      HapticFeedback.mediumImpact();
-                    },
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                decoration: BoxDecoration(
-                  color: widget.task.isRunning
-                      ? AppColors.primary.withOpacity(0.2)
-                      : AppColors.darkCard,
-                  borderRadius: BorderRadius.circular(8),
-                  border: widget.task.isRunning
-                      ? Border.all(color: AppColors.primary, width: 2)
-                      : null,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _isEditing
-                          ? TextField(
-                              controller: _controller,
-                              focusNode: _focusNode,
-                              autofocus: true,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                                isDense: true,
-                                contentPadding: EdgeInsets.zero,
-                                hintText: '태스크 이름을 입력하세요',
-                                hintStyle: TextStyle(color: Colors.white38),
-                              ),
-                              onSubmitted: (value) {
-                                setState(() {
-                                  _isEditing = false;
-                                });
-                                _saveName();
-                              },
-                            )
-                          : Text(
-                              widget.task.name.isEmpty
-                                  ? '태스크 이름을 입력하세요'
-                                  : widget.task.name,
-                              style: TextStyle(
-                                color: widget.task.name.isEmpty
-                                    ? Colors.white38
-                                    : Colors.white,
-                                fontSize: 16,
-                              ),
+            child: Slidable(
+              key: ValueKey('task_${widget.task.id}'),
+              endActionPane: ActionPane(
+                motion: const ScrollMotion(),
+                children: [
+                  // 삭제 버튼
+                  SlidableAction(
+                    onPressed: (context) async {
+                      final shouldDelete = await showDialog<bool>(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('태스크 삭제'),
+                              content: const Text('이 태스크를 삭제하시겠습니까?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: const Text('취소'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: const Text('삭제'),
+                                ),
+                              ],
                             ),
-                    ),
-                    if (widget.task.isRunning && !_isEditing)
-                      const Icon(
-                        Icons.timer,
-                        color: AppColors.primary,
-                        size: 20,
+                          ) ??
+                          false;
+
+                      if (shouldDelete) {
+                        widget.onDelete();
+                      }
+                    },
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    label: '삭제',
+                  ),
+                  // 상세 정보 버튼
+                  SlidableAction(
+                    onPressed: (_) => widget.onShowDetails(),
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    label: '상세',
+                  ),
+                ],
+              ),
+              child: InkWell(
+                onTap: widget.onToggleTimer,
+                onLongPress: () {
+                  // 롱프레스 시 드래그 시작을 위한 피드백
+                  HapticFeedback.mediumImpact();
+                },
+                onDoubleTap: _startEditing, // 더블 탭으로 편집 모드 시작
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: widget.task.isRunning
+                        ? AppColors.primary.withOpacity(0.2)
+                        : AppColors.darkCard,
+                    borderRadius: BorderRadius.circular(8),
+                    border: widget.task.isRunning
+                        ? Border.all(color: AppColors.primary, width: 2)
+                        : null,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          widget.task.name.isEmpty
+                              ? '태스크 이름을 입력하세요'
+                              : widget.task.name,
+                          style: TextStyle(
+                            color: widget.task.name.isEmpty
+                                ? Colors.white38
+                                : Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
-                  ],
+                      if (widget.task.isRunning)
+                        const Icon(
+                          Icons.timer,
+                          color: AppColors.primary,
+                          size: 20,
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-
-          // 편집/완료 버튼
-          IconButton(
-            icon: _isEditing
-                ? const Icon(
-                    Icons.check_circle,
-                    color: AppColors.primary,
-                    size: 24,
-                  )
-                : const Icon(
-                    Icons.edit_outlined,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-            onPressed: _onCompleteTap,
           ),
         ],
       ),

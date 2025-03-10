@@ -243,6 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
             isEditing: task.id == _editingTaskId,
             onToggleTimer: () => _toggleTaskTimer(task.id),
             onShowDetails: () => _showTaskDetails(task.id),
+            onDelete: () => _deleteTask(task.id),
             onNameChanged: (newName) => _updateTaskName(task.id, newName),
           );
         },

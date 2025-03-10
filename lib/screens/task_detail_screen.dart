@@ -634,38 +634,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           key: ValueKey('record_$recordIndex'),
           endActionPane: ActionPane(
             motion: const ScrollMotion(),
-            dismissible: DismissiblePane(
-              onDismissed: () {
-                // 삭제 후 상태 업데이트
-                setState(() {
-                  _taskService.deleteTaskRecord(widget.taskId, recordIndex);
-                  _records = _taskService
-                      .getTaskRecords(widget.taskId); // 전체 레코드를 다시 로드
-                  _totalDuration =
-                      _taskService.getTaskTotalDuration(widget.taskId);
-                });
-              },
-              confirmDismiss: () async {
-                return await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('기록 삭제'),
-                        content: const Text('이 기록을 삭제하시겠습니까?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: const Text('취소'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: const Text('삭제'),
-                          ),
-                        ],
-                      ),
-                    ) ??
-                    false;
-              },
-            ),
             children: [
               SlidableAction(
                 onPressed: (context) async {

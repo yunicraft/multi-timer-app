@@ -1,8 +1,98 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:intl/intl.dart';
 import 'package:timefolio/models/task.dart';
 import 'package:timefolio/theme/app_colors.dart';
+import 'dart:async';
+
+// 실행 중인 타이머를 표시하는 별도 위젯
+class RunningTimerWidget extends StatefulWidget {
+  final Task task;
+
+  const RunningTimerWidget({
+    super.key,
+    required this.task,
+  });
+
+  @override
+  State<RunningTimerWidget> createState() => _RunningTimerWidgetState();
+}
+
+class _RunningTimerWidgetState extends State<RunningTimerWidget> {
+  Timer? _timer;
+  int _currentDuration = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.task.isRunning && widget.task.startTime != null) {
+      _currentDuration =
+          DateTime.now().difference(widget.task.startTime!).inSeconds;
+      _startTimer();
+    }
+  }
+
+  @override
+  void didUpdateWidget(RunningTimerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // 태스크 상태가 변경되었을 때 타이머 관리
+    if (widget.task.isRunning != oldWidget.task.isRunning) {
+      if (widget.task.isRunning && widget.task.startTime != null) {
+        _currentDuration =
+            DateTime.now().difference(widget.task.startTime!).inSeconds;
+        _startTimer();
+      } else {
+        _timer?.cancel();
+      }
+    }
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted && widget.task.isRunning && widget.task.startTime != null) {
+        setState(() {
+          _currentDuration =
+              DateTime.now().difference(widget.task.startTime!).inSeconds;
+        });
+      } else {
+        _timer?.cancel();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  // 시간 형식으로 변환 (HH:MM:SS)
+  String _formatDuration(int seconds) {
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+    final remainingSeconds = seconds % 60;
+
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final totalDuration = widget.task.totalDurationInSeconds + _currentDuration;
+    final startTimeStr = DateFormat('HH:mm:ss').format(widget.task.startTime!);
+    final currentTimeStr = DateFormat('HH:mm:ss').format(DateTime.now());
+
+    return Text(
+      '총 ${_formatDuration(totalDuration)} ($startTimeStr - $currentTimeStr)',
+      style: const TextStyle(
+        color: AppColors.primary,
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+}
 
 class EditableTaskItem extends StatefulWidget {
   final Task task;
@@ -103,6 +193,43 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
       // 일반 모드일 때는 상세 정보 보기
       widget.onShowDetails();
     }
+  }
+
+  // 시간 형식으로 변환 (HH:MM:SS)
+  String _formatDuration(int seconds) {
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+    final remainingSeconds = seconds % 60;
+
+    return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
+
+  // 캡션 위젯 생성
+  Widget _buildCaption() {
+    // 기록이 없는 경우
+    if (widget.task.records.isEmpty && !widget.task.isRunning) {
+      return const Text(
+        '태스크를 탭하여 시간을 측정하세요',
+        style: TextStyle(
+          color: Colors.white60,
+          fontSize: 12,
+        ),
+      );
+    }
+
+    // 현재 측정 중인 경우
+    if (widget.task.isRunning && widget.task.startTime != null) {
+      return RunningTimerWidget(task: widget.task);
+    }
+
+    // 기록이 있는 경우
+    return Text(
+      '총 ${widget.task.formattedTotalDuration}',
+      style: const TextStyle(
+        color: Colors.white60,
+        fontSize: 12,
+      ),
+    );
   }
 
   @override
@@ -252,41 +379,87 @@ class _EditableTaskItemState extends State<EditableTaskItem> {
                   HapticFeedback.mediumImpact();
                 },
                 onDoubleTap: _startEditing, // 더블 탭으로 편집 모드 시작
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: widget.task.isRunning
-                        ? AppColors.primary.withOpacity(0.2)
-                        : AppColors.darkCard,
-                    borderRadius: BorderRadius.circular(8),
-                    border: widget.task.isRunning
-                        ? Border.all(color: AppColors.primary, width: 2)
-                        : null,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.task.name.isEmpty
-                              ? '태스크 이름을 입력하세요'
-                              : widget.task.name,
-                          style: TextStyle(
-                            color: widget.task.name.isEmpty
-                                ? Colors.white38
-                                : Colors.white,
-                            fontSize: 16,
-                          ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: widget.task.isRunning
+                            ? AppColors.primary.withOpacity(0.2)
+                            : AppColors.darkCard,
+                        borderRadius: BorderRadius.only(
+                          topLeft: const Radius.circular(8),
+                          topRight: const Radius.circular(8),
+                          bottomLeft: Radius.circular(
+                              widget.task.records.isEmpty &&
+                                      !widget.task.isRunning &&
+                                      widget.task.name.isEmpty
+                                  ? 8
+                                  : 0),
+                          bottomRight: Radius.circular(
+                              widget.task.records.isEmpty &&
+                                      !widget.task.isRunning &&
+                                      widget.task.name.isEmpty
+                                  ? 8
+                                  : 0),
                         ),
+                        border: widget.task.isRunning
+                            ? Border.all(color: AppColors.primary, width: 2)
+                            : null,
                       ),
-                      if (widget.task.isRunning)
-                        const Icon(
-                          Icons.timer,
-                          color: AppColors.primary,
-                          size: 20,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.task.name.isEmpty
+                                  ? '태스크 이름을 입력하세요'
+                                  : widget.task.name,
+                              style: TextStyle(
+                                color: widget.task.name.isEmpty
+                                    ? Colors.white38
+                                    : Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          if (widget.task.isRunning)
+                            const Icon(
+                              Icons.timer,
+                              color: AppColors.primary,
+                              size: 20,
+                            ),
+                        ],
+                      ),
+                    ),
+                    // 캡션 추가
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 6, horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: widget.task.isRunning
+                            ? AppColors.primary.withOpacity(0.1)
+                            : AppColors.darkCard.withOpacity(0.7),
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(8),
+                          bottomRight: Radius.circular(8),
                         ),
-                    ],
-                  ),
+                        border: widget.task.isRunning
+                            ? Border(
+                                left: const BorderSide(
+                                    color: AppColors.primary, width: 2),
+                                right: const BorderSide(
+                                    color: AppColors.primary, width: 2),
+                                bottom: const BorderSide(
+                                    color: AppColors.primary, width: 2),
+                              )
+                            : null,
+                      ),
+                      child: _buildCaption(),
+                    ),
+                  ],
                 ),
               ),
             ),

@@ -3,6 +3,7 @@ import 'screens/home_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/report_screen.dart';
+import 'screens/task_detail_screen.dart';
 import 'widgets/back_button_handler.dart';
 import 'package:flutter/material.dart';
 
@@ -33,6 +34,20 @@ final router = GoRouter(
     GoRoute(
       path: '/report',
       builder: (context, state) => const ReportScreen(),
+    ),
+
+    // 태스크 상세 화면
+    GoRoute(
+      path: '/task/:id',
+      builder: (context, state) {
+        final taskId = int.parse(state.pathParameters['id'] ?? '0');
+        final taskName = state.extra as Map<String, dynamic>? ?? {};
+        return TaskDetailScreen(
+          taskId: taskId,
+          taskName: taskName['name'] ?? '',
+          onNameChanged: taskName['onNameChanged'],
+        );
+      },
     ),
 
     // 메인 앱 화면들

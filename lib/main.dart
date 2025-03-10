@@ -1,4 +1,5 @@
 import 'package:timefolio/router.dart';
+import 'package:timefolio/services/service_provider.dart';
 import 'package:timefolio/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,6 +17,9 @@ void main() async {
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
+
+  // 서비스 프로바이더 초기화 (싱글톤 패턴으로 자동 초기화)
+  ServiceProvider();
 
   final packageInfo = await PackageInfo.fromPlatform();
 

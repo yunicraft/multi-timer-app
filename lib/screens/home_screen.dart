@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:timefolio/models/task.dart';
+import 'package:timefolio/services/service_provider.dart';
+import 'package:timefolio/services/task_service.dart';
 import 'package:timefolio/theme/app_colors.dart';
+import 'package:timefolio/widgets/app_drawer.dart';
+import 'package:timefolio/widgets/empty_task_message.dart';
+import 'package:timefolio/widgets/task_item.dart';
 
 class HomeScreen extends StatefulWidget {
   final GlobalKey<ScaffoldState>? scaffoldKey;
@@ -16,27 +22,54 @@ class _HomeScreenState extends State<HomeScreen> {
   // 현재 날짜
   DateTime _selectedDate = DateTime.now();
 
-  // 태스크 목록 (임시 데이터)
-  final List<String> _tasks = [];
+  // 서비스 프로바이더
+  final _serviceProvider = ServiceProvider();
+
+  // 태스크 서비스
+  late final TaskService _taskService;
+
+  @override
+  void initState() {
+    super.initState();
+    _taskService = _serviceProvider.taskService;
+  }
 
   // 온보딩 화면으로 이동하는 함수
   void _goToOnboarding(BuildContext context) {
-    context.go('/onboarding');
+    context.push('/onboarding');
   }
 
   // 리포트 화면으로 이동하는 함수
   void _goToReport(BuildContext context) {
-    context.go('/report');
+    context.push('/report');
   }
 
-  // 태스크 추가 다이얼로그 표시
-  void _showAddTaskDialog() {
-    final TextEditingController controller = TextEditingController();
+  // 태스크 추가 함수
+  void _addTask() {
+    setState(() {
+      final newTask = _taskService.addTask('');
+
+      // 포커스를 새 태스크로 이동하기 위해 약간의 지연 후 편집 모드 시작
+      Future.delayed(const Duration(milliseconds: 100), () {
+        _editTaskName(newTask.id);
+      });
+    });
+  }
+
+  // 태스크 이름 편집 함수
+  void _editTaskName(int taskId) {
+    final tasks = _taskService.getTasks();
+    final taskIndex = tasks.indexWhere((task) => task.id == taskId);
+    if (taskIndex == -1) return;
+
+    final task = tasks[taskIndex];
+    final TextEditingController controller =
+        TextEditingController(text: task.name);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('태스크 추가'),
+        title: Text('태스크 ${task.id} 수정'),
         content: TextField(
           controller: controller,
           decoration: const InputDecoration(
@@ -53,21 +86,50 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               if (controller.text.isNotEmpty) {
                 setState(() {
-                  _tasks.add(controller.text);
+                  _taskService.updateTaskName(task.id, controller.text);
                 });
               }
               Navigator.pop(context);
             },
-            child: const Text('추가'),
+            child: const Text('저장'),
           ),
         ],
       ),
     );
   }
 
-  // 메뉴 드로어 열기
-  void _openDrawer() {
-    widget.scaffoldKey?.currentState?.openDrawer();
+  // 태스크 타이머 시작/중지 함수
+  void _toggleTaskTimer(int taskId) {
+    setState(() {
+      _taskService.toggleTaskTimer(taskId);
+    });
+  }
+
+  // 태스크 삭제 함수
+  void _deleteTask(int taskId) {
+    setState(() {
+      _taskService.deleteTask(taskId);
+    });
+  }
+
+  // 태스크 상세 정보 보기 함수
+  void _showTaskDetails(int taskId) {
+    final tasks = _taskService.getTasks();
+    final taskIndex = tasks.indexWhere((task) => task.id == taskId);
+    if (taskIndex == -1) return;
+
+    final task = tasks[taskIndex];
+    context.push(
+      '/task/${task.id}',
+      extra: {
+        'name': task.name,
+        'onNameChanged': (String newName) {
+          setState(() {
+            _taskService.updateTaskName(task.id, newName);
+          });
+        },
+      },
+    );
   }
 
   @override
@@ -76,118 +138,84 @@ class _HomeScreenState extends State<HomeScreen> {
     final dateFormat = DateFormat('yyyy.MM.dd');
     final formattedDate = dateFormat.format(_selectedDate);
 
+    // 태스크 목록
+    final tasks = _taskService.getTasks();
+
     return Scaffold(
       key: widget.scaffoldKey,
       backgroundColor: AppColors.darkBackground,
 
       // 메뉴 드로어
-      drawer: _buildDrawer(),
+      drawer: AppDrawer(
+        onOnboardingTap: () => _goToOnboarding(context),
+        onShareTap: () {
+          // TODO: 공유 기능 구현
+        },
+        onContactTap: () {
+          // TODO: 문의하기 기능 구현
+        },
+        onPrivacyPolicyTap: () {
+          // TODO: 개인정보 처리방침 페이지로 이동
+        },
+        onTermsOfServiceTap: () {
+          // TODO: 이용약관 페이지로 이동
+        },
+        onVersionInfoTap: () {
+          // TODO: 버전 정보 표시
+        },
+      ),
 
-      // 앱바 대신 커스텀 헤더 사용
-      appBar: null,
+      // 앱바 사용
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          formattedDate,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        actions: [
+          // 리포트 버튼
+          IconButton(
+            icon: const Icon(Icons.assessment, color: Colors.white),
+            tooltip: '통계 보기',
+            onPressed: () => _goToReport(context),
+          ),
+          // 태스크 추가 버튼
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.white),
+            tooltip: '태스크 추가',
+            onPressed: _addTask,
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
 
       body: SafeArea(
         child: Column(
           children: [
-            // 상단 헤더 (메뉴 버튼, 날짜, 리포트 버튼, 태스크 추가 버튼)
-            _buildHeader(formattedDate),
-
             // 태스크가 없을 때 메시지
-            if (_tasks.isEmpty) _buildEmptyTaskMessage(),
+            if (tasks.isEmpty) const EmptyTaskMessage(),
 
             // 태스크 목록
-            if (_tasks.isNotEmpty) _buildTaskList(),
-          ],
-        ),
-      ),
-    );
-  }
+            if (tasks.isNotEmpty) _buildTaskList(tasks),
 
-  // 상단 헤더 위젯
-  Widget _buildHeader(String formattedDate) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // 메뉴 버튼
-          IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
-            onPressed: _openDrawer,
-          ),
-
-          // 날짜
-          Text(
-            formattedDate,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          // 리포트 버튼과 태스크 추가 버튼
-          Row(
-            children: [
-              // 리포트 버튼
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.outline),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: IconButton(
-                  icon: const Text(
-                    'R',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+            // 키보드 표시 안내 (태스크가 있을 때만 표시)
+            if (tasks.isNotEmpty)
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  '키보드 올라 옴',
+                  style: TextStyle(
+                    color: Colors.white54,
+                    fontSize: 14,
                   ),
-                  onPressed: () => _goToReport(context),
                 ),
               ),
-              const SizedBox(width: 8),
-              // 태스크 추가 버튼
-              Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: AppColors.outline),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.add, color: Colors.white),
-                  onPressed: _showAddTaskDialog,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 태스크가 없을 때 메시지 위젯
-  Widget _buildEmptyTaskMessage() {
-    return Expanded(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              '아직 태스크가 없어요!',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              '상단의 + 버튼으로 생성해주세요.',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 16,
-              ),
-            ),
           ],
         ),
       ),
@@ -195,141 +223,27 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // 태스크 목록 위젯
-  Widget _buildTaskList() {
+  Widget _buildTaskList(List<Task> tasks) {
     return Expanded(
-      child: ListView.builder(
+      child: ReorderableListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: _tasks.length,
+        itemCount: tasks.length,
+        onReorder: (oldIndex, newIndex) {
+          setState(() {
+            _taskService.reorderTasks(oldIndex, newIndex);
+          });
+        },
         itemBuilder: (context, index) {
-          return Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            color: AppColors.darkCard,
-            child: ListTile(
-              title: Text(
-                _tasks[index],
-                style: const TextStyle(color: Colors.white),
-              ),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.play_arrow, color: AppColors.gold),
-                    onPressed: () {
-                      // TODO: 태스크 시작 기능 구현
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.white54),
-                    onPressed: () {
-                      setState(() {
-                        _tasks.removeAt(index);
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
+          final task = tasks[index];
+          return TaskItem(
+            key: ValueKey(task.id),
+            task: task,
+            index: index,
+            onToggleTimer: () => _toggleTaskTimer(task.id),
+            onShowDetails: () => _showTaskDetails(task.id),
           );
         },
       ),
-    );
-  }
-
-  // 메뉴 드로어 위젯
-  Widget _buildDrawer() {
-    return Drawer(
-      child: Container(
-        color: AppColors.darkSurface,
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: const BoxDecoration(
-                color: AppColors.darkCard,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  const Text(
-                    'Timefolio',
-                    style: TextStyle(
-                      color: AppColors.gold,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '당신의 시간 자산, 제대로 투자하세요.',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            _buildDrawerItem(
-              icon: Icons.help_outline,
-              title: '앱 사용 방법',
-              onTap: () => _goToOnboarding(context),
-            ),
-            _buildDrawerItem(
-              icon: Icons.share,
-              title: '공유하고 포인트 받기',
-              onTap: () {
-                // TODO: 공유 기능 구현
-              },
-            ),
-            _buildDrawerItem(
-              icon: Icons.email_outlined,
-              title: '문의하기',
-              onTap: () {
-                // TODO: 문의하기 기능 구현
-              },
-            ),
-            const Divider(color: AppColors.outline),
-            _buildDrawerItem(
-              icon: Icons.privacy_tip_outlined,
-              title: '개인정보 처리방침',
-              onTap: () {
-                // TODO: 개인정보 처리방침 페이지로 이동
-              },
-            ),
-            _buildDrawerItem(
-              icon: Icons.description_outlined,
-              title: '이용약관',
-              onTap: () {
-                // TODO: 이용약관 페이지로 이동
-              },
-            ),
-            _buildDrawerItem(
-              icon: Icons.info_outline,
-              title: '버전 정보',
-              onTap: () {
-                // TODO: 버전 정보 표시
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 드로어 아이템 위젯
-  Widget _buildDrawerItem({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: Colors.white70),
-      title: Text(
-        title,
-        style: const TextStyle(color: Colors.white),
-      ),
-      onTap: onTap,
     );
   }
 }

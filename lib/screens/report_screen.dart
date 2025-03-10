@@ -25,7 +25,7 @@ class ReportScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.bar_chart,
+              Icons.assessment,
               size: 80,
               color: AppColors.gold,
             ),

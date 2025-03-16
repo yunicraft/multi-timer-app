@@ -1,0 +1,2 @@
+/Users/daco/dev/clockpolio/android/app/.cxx/RelWithDebInfo/3o6p2j1b/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/daco/dev/clockpolio/android/app/.cxx/RelWithDebInfo/3o6p2j1b/armeabi-v7a/CMakeFiles/rebuild_cache.dir

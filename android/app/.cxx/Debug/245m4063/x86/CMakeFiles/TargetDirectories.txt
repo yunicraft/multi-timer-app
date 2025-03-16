@@ -1,0 +1,2 @@
+/Users/daco/dev/clockpolio/android/app/.cxx/Debug/245m4063/x86/CMakeFiles/edit_cache.dir
+/Users/daco/dev/clockpolio/android/app/.cxx/Debug/245m4063/x86/CMakeFiles/rebuild_cache.dir

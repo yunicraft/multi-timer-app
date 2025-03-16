@@ -3,15 +3,11 @@ import 'package:timefolio/services/service_provider.dart';
 import 'package:timefolio/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 void main() async {
   // Flutter 엔진 초기화
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 환경 변수 로드
-  await dotenv.load(fileName: '.env');
 
   // 화면 세로 고정
   await SystemChrome.setPreferredOrientations([

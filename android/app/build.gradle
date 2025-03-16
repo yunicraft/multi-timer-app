@@ -16,12 +16,12 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
     defaultConfig {
@@ -33,17 +33,29 @@ android {
     }
 
     signingConfigs {
-        release {
-            storeFile file(keyStoreProperties['storeFile'])
-            storePassword keyStoreProperties['storePassword']
-            keyAlias keyStoreProperties['keyAlias']
-            keyPassword keyStoreProperties['keyPassword']
+        debug {
+            // 디버그 모드에서는 서명 설정 없이 진행
+        }
+        if (keyStoreFile.exists()) {
+            release {
+                storeFile file(keyStoreProperties['storeFile'])
+                storePassword keyStoreProperties['storePassword']
+                keyAlias keyStoreProperties['keyAlias']
+                keyPassword keyStoreProperties['keyPassword']
+            }
         }
     }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
         release {
-            signingConfig = signingConfigs.release
+            if (keyStoreFile.exists()) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+            }
             // 최적화 건너띄기 시 활성화
             // shrinkResources false
         }
